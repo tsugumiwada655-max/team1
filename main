@@ -47,6 +47,21 @@
 		.topic { white-space: nowrap; padding: 8px 15px; border: 1px solid var(--line); border-radius: 30px; background: transparent; color: #787a72; font-size: 12px; }
 		.topic.selected, .topic:hover { border-color: var(--green); background: var(--green); color: #fff; }
 
+		.map-panel { margin-bottom: 24px; background: var(--paper); border: 1px solid var(--line); border-radius: 15px; box-shadow: var(--shadow); overflow: hidden; }
+		.map-header { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 16px 18px; border-bottom: 1px solid var(--line); }
+		.map-header h2 { margin: 0; font-size: 15px; }
+		.map-header span { color: var(--muted); font-size: 11px; }
+		.map-wrap { display: grid; grid-template-columns: minmax(0, 1.55fr) 260px; }
+		#shop-map { width: 100%; height: 330px; border: 0; display: block; background: #edf1ee; }
+		.map-list { display: grid; gap: 10px; max-height: 330px; padding: 12px; background: #fbfbf8; overflow-y: auto; }
+		.map-list-item { display: flex; align-items: flex-start; gap: 10px; width: 100%; padding: 10px 10px; border: 1px solid transparent; border-radius: 10px; background: #fff; color: var(--ink); text-align: left; }
+		.map-list-item.active { border-color: var(--green); background: var(--green-soft); }
+		.map-pin { width: 12px; height: 12px; margin-top: 4px; border-radius: 50%; background: var(--coral); box-shadow: 0 0 0 4px rgba(236, 120, 92, .13); }
+		.map-item-copy { min-width: 0; }
+		.map-item-copy strong { display: block; font-size: 12px; }
+		.map-item-copy small { display: block; margin-top: 4px; color: var(--muted); font-size: 10px; }
+		.map-item-copy em { display: block; margin-top: 4px; color: var(--green); font-style: normal; font-size: 10px; }
+
 		.post-card { overflow: hidden; margin-bottom: 27px; background: var(--paper); border: 1px solid #efeee9; border-radius: 13px; box-shadow: var(--shadow); animation: rise .45s ease both; }
 		.post-head { display: flex; align-items: center; justify-content: space-between; padding: 17px 19px 13px; }
 		.user { display: flex; align-items: center; gap: 10px; }
@@ -110,6 +125,13 @@
 		<main>
 			<div class="topbar"><div><h1 id="page-title">みんなのおすすめ</h1><small>東京の食べ歩きログ</small></div><label class="search"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><input id="search-input" placeholder="店名・料理を探す"></label></div>
 			<div class="topics"><button class="topic selected">すべて</button><button class="topic">カフェ</button><button class="topic">ランチ</button><button class="topic">居酒屋</button><button class="topic">スイーツ</button><button class="topic">ひとりごはん</button></div>
+			<section class="map-panel" aria-label="おすすめのお店マップ">
+				<div class="map-header"><h2>おすすめのお店マップ</h2><span>Google Map で周辺を確認</span></div>
+				<div class="map-wrap">
+					<iframe id="shop-map" title="おすすめ店マップ" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+					<div id="shop-map-list" class="map-list" aria-label="おすすめ店舗一覧"></div>
+				</div>
+			</section>
 			<section class="composer" id="composer"><textarea id="post-text" placeholder="今日見つけたおいしい店をシェアしよう..." aria-label="投稿内容"></textarea><div class="composer-bottom"><span>写真はあとから追加できます</span><button id="submit-post">投稿する</button></div></section>
 
 			<article class="post-card" data-keywords="ビストロ ランチ 神楽坂 ワイン">
@@ -141,76 +163,8 @@
 			document.querySelector('main').insertBefore(card, composer.nextSibling);
 			document.querySelector('#post-text').value = ''; composer.classList.remove('open'); bindReactions(card);
 		});
-		const rankingData = {
-			overall: [
-				{ name: 'Bistro Lien', area: '神楽坂', genre: 'フレンチ', score: 4.9, reviews: '1,284件' },
-				{ name: 'PIZZERIA da Luca', area: '中目黒', genre: 'イタリアン', score: 4.8, reviews: '1,126件' },
-				{ name: 'Sora Coffee', area: '代官山', genre: 'カフェ', score: 4.8, reviews: '918件' },
-				{ name: '銀座 すし旬', area: '銀座', genre: '寿司', score: 4.7, reviews: '842件' },
-				{ name: 'Maki Ramen', area: '下北沢', genre: 'ラーメン', score: 4.7, reviews: '785件' }
-			],
-			cafe: [
-				{ name: 'Sora Coffee', area: '代官山', genre: 'カフェ', score: 4.9, reviews: '918件' },
-				{ name: '杏の庭', area: '渋谷', genre: 'カフェ', score: 4.8, reviews: '703件' },
-				{ name: 'Moonlight Table', area: '恵比寿', genre: 'カフェ', score: 4.7, reviews: '602件' },
-				{ name: '白い花', area: '表参道', genre: 'カフェ', score: 4.7, reviews: '541件' },
-				{ name: '木漏れ日珈琲', area: '吉祥寺', genre: 'カフェ', score: 4.6, reviews: '489件' }
-			],
-			lunch: [
-				{ name: 'Bistro Lien', area: '神楽坂', genre: 'ランチ', score: 4.9, reviews: '1,284件' },
-				{ name: '肉と麦', area: '新宿', genre: 'ランチ', score: 4.8, reviews: '873件' },
-				{ name: '菜の香', area: '中野', genre: 'ランチ', score: 4.8, reviews: '741件' },
-				{ name: 'olive lunch', area: '大久保', genre: 'ランチ', score: 4.7, reviews: '630件' },
-				{ name: '麦の穂', area: '池袋', genre: 'ランチ', score: 4.6, reviews: '528件' }
-			],
-			izakaya: [
-				{ name: '夜の台所', area: '六本木', genre: '居酒屋', score: 4.9, reviews: '966件' },
-				{ name: '枝豆屋', area: '新橋', genre: '居酒屋', score: 4.8, reviews: '804件' },
-				{ name: '八丁味噌', area: '上野', genre: '居酒屋', score: 4.8, reviews: '692件' },
-				{ name: '焼き鳥すみれ', area: '渋谷', genre: '居酒屋', score: 4.7, reviews: '606件' },
-				{ name: '深夜の灯', area: '池袋', genre: '居酒屋', score: 4.6, reviews: '541件' }
-			],
-			sweets: [
-				{ name: 'ミルクの雫', area: '原宿', genre: 'スイーツ', score: 4.9, reviews: '882件' },
-				{ name: 'ふわこっ', area: '代官山', genre: 'スイーツ', score: 4.8, reviews: '756件' },
-				{ name: 'チョコノート', area: '秋葉原', genre: 'スイーツ', score: 4.8, reviews: '698件' },
-				{ name: '甘味処 うらら', area: '自由が丘', genre: 'スイーツ', score: 4.7, reviews: '573件' },
-				{ name: 'フルーツらんど', area: '吉祥寺', genre: 'スイーツ', score: 4.6, reviews: '511件' }
-			]
-		};
-
-		function renderRanking(key) {
-			const list = document.querySelector('#ranking-list');
-			const items = rankingData[key] || rankingData.overall;
-			list.innerHTML = items.map((item, index) => `
-				<li class="rank-item">
-					<div class="rank-number">${index + 1}</div>
-					<div class="rank-main">
-						<strong>${item.name}</strong>
-						<div class="rank-meta">
-							<span>${item.genre}</span>
-							<span>・</span>
-							<span>${item.area}</span>
-						</div>
-					</div>
-					<div class="rank-score">
-						<span>★ ${item.score.toFixed(1)}</span>
-						<small>${item.reviews}</small>
-					</div>
-				</li>
-			`).join('');
-		}
-
 		function bindReactions(scope = document) { scope.querySelectorAll('.like').forEach(button => button.onclick = () => { button.classList.toggle('liked'); button.querySelector('span').textContent = button.classList.contains('liked') ? '♥' : '♡'; }); scope.querySelectorAll('.bookmark').forEach(button => button.onclick = () => { button.classList.toggle('saved'); button.querySelector('em').textContent = button.classList.contains('saved') ? '保存済み' : '保存'; }); }
 		bindReactions();
-		renderRanking('overall');
-		document.querySelectorAll('.ranking-tab').forEach(tab => tab.addEventListener('click', () => {
-			document.querySelectorAll('.ranking-tab').forEach(item => {
-				item.classList.toggle('active', item === tab);
-				item.setAttribute('aria-selected', String(item === tab));
-			});
-			renderRanking(tab.dataset.ranking);
-		}));
 		document.querySelectorAll('.topic').forEach(topic => topic.addEventListener('click', () => { document.querySelectorAll('.topic').forEach(item => item.classList.remove('selected')); topic.classList.add('selected'); }));
 		document.querySelector('#search-input').addEventListener('input', event => { const query = event.target.value.toLowerCase(); document.querySelectorAll('.post-card').forEach(card => { card.style.display = !query || card.dataset.keywords?.toLowerCase().includes(query) || card.textContent.toLowerCase().includes(query) ? '' : 'none'; }); });
 		document.querySelectorAll('.menu button').forEach(button => button.addEventListener('click', () => { document.querySelectorAll('.menu button').forEach(item => item.classList.remove('active')); button.classList.add('active'); document.querySelector('#page-title').textContent = button.dataset.view === 'ホーム' ? 'みんなのおすすめ' : button.dataset.view; }));
