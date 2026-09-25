@@ -1,27 +1,275 @@
 <!doctype html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#264a3a">
-  <title>もぐもぐ - いい店を、みんなの食卓に</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="theme-color" content="#264a3a">
+	<title>もぐもぐ - いい店を、みんなの食卓に</title>
+	<style>
+		@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600;700;800&display=swap');
+
+		:root {
+			--ink: #20221e;
+			--muted: #888a82;
+			--line: #e9e9e4;
+			--cream: #f8f8f3;
+			--paper: #fffefa;
+			--green: #264a3a;
+			--green-soft: #e2ede5;
+			--coral: #ec785c;
+			--yellow: #f3c759;
+			--shadow: 0 18px 55px rgba(40, 45, 34, .08);
+		}
+
+		* { box-sizing: border-box; }
+		body { margin: 0; color: var(--ink); background: var(--cream); font-family: 'Noto Sans JP', sans-serif; }
+		button, input, textarea { font: inherit; }
+		button { cursor: pointer; }
+		.app { display: grid; grid-template-columns: 240px minmax(480px, 720px) 285px; justify-content: center; gap: 38px; max-width: 1440px; margin: 0 auto; padding: 25px 38px 60px; }
+
+		.sidebar { position: sticky; top: 0; height: calc(100vh - 50px); display: flex; flex-direction: column; padding: 8px 0 25px; }
+		.brand { display: flex; align-items: center; gap: 11px; margin-bottom: 52px; font: 700 29px/1 'DM Sans', sans-serif; letter-spacing: -.8px; }
+		.brand-mark { display: grid; place-items: center; width: 35px; height: 35px; background: var(--coral); border-radius: 50% 50% 50% 7px; color: #fff; font-size: 18px; transform: rotate(-8deg); }
+		.menu { display: grid; gap: 8px; }
+		.menu button { display: flex; align-items: center; gap: 15px; height: 47px; padding: 0 14px; border: 0; background: transparent; border-radius: 10px; color: #77786f; text-align: left; transition: .2s; }
+		.menu button:hover, .menu button.active { background: #e9eee9; color: var(--green); font-weight: 700; }
+		.icon { width: 21px; height: 21px; flex: 0 0 21px; }
+		.share-button { display: flex; align-items: center; justify-content: center; gap: 9px; width: 100%; margin-top: 23px; padding: 13px; border: 0; border-radius: 10px; background: var(--green); color: #fff; font-weight: 700; box-shadow: 0 9px 20px rgba(38, 74, 58, .2); }
+		.side-note { margin-top: auto; padding: 17px; border-radius: 12px; background: var(--green-soft); color: var(--green); font-size: 12px; line-height: 1.8; }
+		.side-note strong { display: block; margin-bottom: 3px; font-size: 13px; }
+
+		main { min-width: 0; }
+		.topbar { display: flex; align-items: center; justify-content: space-between; height: 42px; margin-bottom: 24px; }
+		.topbar h1 { margin: 0; font-size: 21px; letter-spacing: -.6px; }
+		.topbar small { color: var(--muted); font-size: 12px; }
+		.search { display: flex; align-items: center; gap: 8px; width: 185px; padding: 9px 12px; background: #fff; border: 1px solid var(--line); border-radius: 9px; color: #aaa; }
+		.search input { width: 100%; border: 0; outline: 0; background: transparent; font-size: 12px; }
+		.topics { display: flex; gap: 9px; overflow-x: auto; margin-bottom: 22px; padding-bottom: 2px; }
+		.topic { white-space: nowrap; padding: 8px 15px; border: 1px solid var(--line); border-radius: 30px; background: transparent; color: #787a72; font-size: 12px; }
+		.topic.selected, .topic:hover { border-color: var(--green); background: var(--green); color: #fff; }
+		.map-panel { margin-bottom: 24px; background: var(--paper); border: 1px solid var(--line); border-radius: 15px; box-shadow: var(--shadow); overflow: hidden; }
+		.map-header { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 16px 18px; border-bottom: 1px solid var(--line); }
+		.map-header h2 { margin: 0; font-size: 15px; }
+		.map-header span { color: var(--muted); font-size: 11px; }
+		.map-wrap { display: grid; grid-template-columns: minmax(0, 1.55fr) 260px; }
+		#shop-map { width: 100%; height: 330px; border: 0; display: block; background: #edf1ee; }
+		.map-list { display: grid; gap: 10px; max-height: 330px; padding: 12px; background: #fbfbf8; overflow-y: auto; }
+		.map-list-item { display: flex; align-items: flex-start; gap: 10px; width: 100%; padding: 10px; border: 1px solid transparent; border-radius: 10px; background: #fff; color: var(--ink); text-align: left; }
+		.map-list-item.active { border-color: var(--green); background: var(--green-soft); }
+		.map-pin { width: 12px; height: 12px; margin-top: 4px; border-radius: 50%; background: var(--coral); box-shadow: 0 0 0 4px rgba(236, 120, 92, .13); }
+		.map-item-copy { min-width: 0; }
+		.map-item-copy strong { display: block; font-size: 12px; }
+		.map-item-copy small { display: block; margin-top: 4px; color: var(--muted); font-size: 10px; }
+		.map-item-copy em { display: block; margin-top: 4px; color: var(--green); font-style: normal; font-size: 10px; }
+
+		.ranking-panel { margin-bottom: 26px; padding: 18px 18px 14px; background: var(--paper); border: 1px solid #efeee9; border-radius: 13px; box-shadow: var(--shadow); }
+		.ranking-header { display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; margin-bottom: 16px; }
+		.eyebrow { margin: 0 0 5px; color: var(--coral); font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+		.ranking-header h2 { margin: 0; font-size: 19px; letter-spacing: -.5px; }
+		.ranking-tabs { display: flex; flex-wrap: wrap; gap: 8px; }
+		.ranking-tab { padding: 7px 12px; border: 1px solid var(--line); border-radius: 999px; background: #fff; color: var(--muted); font-size: 11px; }
+		.ranking-tab.active { background: var(--green); border-color: var(--green); color: #fff; }
+		.ranking-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+		.rank-item { display: grid; grid-template-columns: 42px minmax(0,1fr) auto; align-items: center; gap: 12px; padding: 12px 12px; border: 1px solid var(--line); border-radius: 12px; background: #fffdf9; }
+		.rank-number { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: var(--green-soft); color: var(--green); font-size: 12px; font-weight: 800; }
+		.rank-main { min-width: 0; }
+		.rank-main strong { display: block; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+		.rank-meta { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 4px; color: var(--muted); font-size: 10px; }
+		.rank-score { display: flex; align-items: center; gap: 5px; color: var(--green); font-size: 12px; font-weight: 800; }
+		.rank-score small { color: var(--muted); font-size: 10px; }
+
+		.post-card { overflow: hidden; margin-bottom: 27px; background: var(--paper); border: 1px solid #efeee9; border-radius: 13px; box-shadow: var(--shadow); animation: rise .45s ease both; }
+		.post-head { display: flex; align-items: center; justify-content: space-between; padding: 17px 19px 13px; }
+		.user { display: flex; align-items: center; gap: 10px; }
+		.avatar { display: grid; place-items: center; width: 35px; height: 35px; border-radius: 50%; color: #fff; font-size: 14px; font-weight: 800; }
+		.avatar.a { background: #cf826b; } .avatar.b { background: #547d6a; } .avatar.c { background: #b78c4b; }
+		.user b { display: block; font-size: 12px; } .user span { color: var(--muted); font-size: 10px; }
+		.dots { border: 0; background: transparent; color: #999; letter-spacing: 2px; }
+		.post-image { position: relative; height: 390px; background-position: center; background-size: cover; }
+		.image-one { background-image: url('https://images.unsplash.com/photo-1515003197210-e0cd71810b5f?auto=format&fit=crop&w=1200&q=85'); }
+		.image-two { background-image: url('https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=1200&q=85'); }
+		.place-tag { position: absolute; left: 17px; bottom: 16px; display: flex; align-items: center; gap: 6px; padding: 8px 11px; border-radius: 8px; background: rgba(255,255,255,.93); color: var(--green); font-size: 11px; font-weight: 700; backdrop-filter: blur(8px); }
+		.post-body { padding: 13px 19px 18px; }
+		.actions { display: flex; align-items: center; gap: 15px; margin-bottom: 9px; }
+		.action { display: flex; align-items: center; gap: 5px; padding: 0; border: 0; background: none; color: #666860; font-size: 11px; }
+		.action:hover, .action.liked { color: var(--coral); } .action.saved { color: var(--green); }
+		.action.bookmark { margin-left: auto; }
+		.caption { margin: 0; font-size: 13px; line-height: 1.8; } .caption b { margin-right: 6px; }
+		.meta { display: flex; gap: 13px; margin-top: 9px; color: var(--muted); font-size: 10px; }
+
+		.rightbar { padding-top: 57px; }
+		.profile { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; }
+		.profile .avatar { width: 45px; height: 45px; font-size: 17px; background: var(--green); }
+		.profile b { font-size: 13px; } .profile span { display: block; margin-top: 3px; color: var(--muted); font-size: 10px; }
+		.panel-title { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 14px; font-size: 13px; }
+		.panel-title a { color: var(--coral); font-size: 10px; }
+		.saved-list { display: grid; gap: 13px; }
+		.saved-item { display: flex; align-items: center; gap: 10px; }
+		.saved-photo { width: 50px; height: 50px; flex: 0 0 50px; border-radius: 8px; background-size: cover; background-position: center; }
+		.saved-photo.one { background-image: url('https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=200&q=80'); }
+		.saved-photo.two { background-image: url('https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=200&q=80'); }
+		.saved-photo.three { background-image: url('https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&w=200&q=80'); }
+		.saved-item b { display: block; font-size: 11px; } .saved-item span { color: var(--muted); font-size: 10px; }
+		.trend { margin-top: 35px; padding: 17px; border: 1px solid var(--line); border-radius: 11px; background: #fff; }
+		.trend h2 { margin: 0 0 13px; font-size: 13px; } .trend p { margin: 8px 0; color: #777; font-size: 11px; } .trend strong { color: var(--ink); }
+		.mobile-nav { display: none; }
+		.composer { display: none; margin-bottom: 24px; padding: 16px 18px; background: #fff; border: 1px solid var(--line); border-radius: 12px; }
+		.composer.open { display: block; animation: rise .3s ease both; }
+		.composer textarea { display: block; width: 100%; min-height: 72px; resize: vertical; border: 0; outline: 0; color: var(--ink); font-size: 13px; }
+		.composer-bottom { display: flex; justify-content: space-between; align-items: center; padding-top: 9px; border-top: 1px solid var(--line); }
+		.composer-bottom span { color: var(--muted); font-size: 11px; } .composer-bottom button { border: 0; border-radius: 7px; padding: 8px 15px; background: var(--coral); color: white; font-size: 11px; font-weight: 700; }
+		@keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+		@media (max-width: 1050px) { .app { grid-template-columns: 190px minmax(440px, 650px); gap: 25px; } .rightbar { display: none; } }
+		@media (max-width: 700px) { .app { display: block; padding: 18px 15px 83px; } .sidebar { position: static; height: auto; padding: 0; } .brand { margin-bottom: 19px; } .menu, .side-note, .sidebar .share-button { display: none; } .topbar { margin-bottom: 19px; } .topbar h1 { font-size: 19px; } .search { width: 145px; } .post-image { height: min(105vw, 390px); } .post-head { padding: 14px 15px 11px; } .post-body { padding: 12px 15px 16px; } .mobile-nav { position: fixed; z-index: 4; right: 0; bottom: 0; left: 0; display: flex; justify-content: space-around; padding: 12px 15px 17px; background: rgba(255,254,250,.96); border-top: 1px solid var(--line); backdrop-filter: blur(12px); } .mobile-nav button { border: 0; background: none; color: #888; } .mobile-nav button.active { color: var(--green); } .mobile-nav .icon { display: block; margin: auto; width: 20px; height: 20px; } }
+	</style>
 </head>
 <body>
-  <p>読み込み中...</p>
-  <script>
-    fetch('./main')
-      .then(response => {
-        if (!response.ok) throw new Error('アプリを読み込めませんでした');
-        return response.text();
-      })
-      .then(source => {
-        document.open();
-        document.write(source);
-        document.close();
-      })
-      .catch(() => {
-        document.body.innerHTML = '<p>読み込みに失敗しました。ページを再読み込みしてください。</p>';
-      });
-  </script>
+	<div class="app">
+		<aside class="sidebar">
+			<div class="brand"><span class="brand-mark">m</span> mogu</div>
+			<nav class="menu" aria-label="メインメニュー">
+				<button class="active" data-view="ホーム"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V10Z"/><path d="M9 21v-7h6v7"/></svg>ホーム</button>
+				<button data-view="発見する"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>発見する</button>
+				<button data-view="保存した店"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18l-6-4-6 4V4Z"/></svg>保存した店</button>
+				<button data-view="プロフィール"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c.8-3.3 3.1-5 7-5s6.2 1.7 7 5"/></svg>プロフィール</button>
+			</nav>
+			<button class="share-button" id="open-composer"><span>＋</span> 店を投稿する</button>
+			<div class="side-note"><strong>今日のひと皿を探そう</strong>近くのお気に入りを、次の誰かへ。</div>
+		</aside>
+
+		<main>
+			<div class="topbar"><div><h1 id="page-title">みんなのおすすめ</h1><small>東京の食べ歩きログ</small></div><label class="search"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><input id="search-input" placeholder="店名・料理を探す"></label></div>
+			<div class="topics"><button class="topic selected">すべて</button><button class="topic">カフェ</button><button class="topic">ランチ</button><button class="topic">居酒屋</button><button class="topic">スイーツ</button><button class="topic">ひとりごはん</button></div>
+			<section class="map-panel" aria-label="おすすめのお店マップ">
+				<div class="map-header"><h2>おすすめのお店マップ</h2><span>Google Mapで周辺を確認</span></div>
+				<div class="map-wrap">
+					<iframe id="shop-map" title="おすすめ店 マップ" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+					<div id="shop-map-list" class="map-list" aria-label="おすすめ店舗一覧"></div>
+				</div>
+			</section>
+			<section class="ranking-panel" aria-label="ランキング">
+				<div class="ranking-header">
+					<div>
+						<p class="eyebrow">Ranking</p>
+						<h2>みんなのおすすめTOP 5</h2>
+					</div>
+					<div class="ranking-tabs" role="tablist" aria-label="ランキングのジャンル切り替え">
+						<button class="ranking-tab active" data-ranking="overall" role="tab" aria-selected="true">全体</button>
+						<button class="ranking-tab" data-ranking="cafe" role="tab" aria-selected="false">カフェ</button>
+						<button class="ranking-tab" data-ranking="lunch" role="tab" aria-selected="false">ランチ</button>
+						<button class="ranking-tab" data-ranking="izakaya" role="tab" aria-selected="false">居酒屋</button>
+						<button class="ranking-tab" data-ranking="sweets" role="tab" aria-selected="false">スイーツ</button>
+					</div>
+				</div>
+				<ol id="ranking-list" class="ranking-list"></ol>
+			</section>
+			<section class="composer" id="composer"><textarea id="post-text" placeholder="今日見つけたおいしい店をシェアしよう..." aria-label="投稿内容"></textarea><div class="composer-bottom"><span>写真はあとから追加できます</span><button id="submit-post">投稿する</button></div></section>
+
+			<article class="post-card" data-keywords="ビストロ ランチ 神楽坂 ワイン">
+				<div class="post-head"><div class="user"><div class="avatar a">美</div><div><b>美咲 / misaki</b><span>2時間前 ・ 神楽坂</span></div></div><button class="dots" aria-label="その他">•••</button></div>
+				<div class="post-image image-one"><div class="place-tag">⌖　Bistro Lien　·　神楽坂</div></div>
+				<div class="post-body"><div class="actions"><button class="action like"><span>♡</span><em>128</em></button><button class="action"><span>◯</span><em>18</em></button><button class="action bookmark"><span>♧</span><em>保存</em></button></div><p class="caption"><b>美咲 / misaki</b>季節の野菜が主役のランチ。丁寧なのに気取らない、また来たくなるビストロでした。</p><div class="meta"><span>♧ フレンチ</span><span>¥¥</span><span>ランチにおすすめ</span></div></div>
+			</article>
+			<article class="post-card" data-keywords="ピザ 中目黒 夜ごはん イタリアン">
+				<div class="post-head"><div class="user"><div class="avatar b">悠</div><div><b>悠太 / yuta</b><span>昨日 ・ 中目黒</span></div></div><button class="dots" aria-label="その他">•••</button></div>
+				<div class="post-image image-two"><div class="place-tag">⌖　PIZZERIA da Luca　·　中目黒</div></div>
+				<div class="post-body"><div class="actions"><button class="action like"><span>♡</span><em>86</em></button><button class="action"><span>◯</span><em>7</em></button><button class="action bookmark"><span>♧</span><em>保存</em></button></div><p class="caption"><b>悠太 / yuta</b>薪窯から出てくる香りに負けて、気づいたら2枚目。耳までおいしいピザ。</p><div class="meta"><span>♧ イタリアン</span><span>¥¥</span><span>夜ごはんにおすすめ</span></div></div>
+			</article>
+		</main>
+
+		<aside class="rightbar"><div class="profile"><div class="avatar">T</div><div><b>toma</b><span>食べることが好きです</span></div></div><div class="panel-title"><b>保存した店</b><a href="#">すべて見る</a></div><div class="saved-list"><div class="saved-item"><div class="saved-photo one"></div><div><b>食堂 かど</b><span>蔵前 ・ 定食</span></div></div><div class="saved-item"><div class="saved-photo two"></div><div><b>GOOD CHEESE</b><span>渋谷 ・ カフェ</span></div></div><div class="saved-item"><div class="saved-photo three"></div><div><b>鮨 まつもと</b><span>恵比寿 ・ 寿司</span></div></div></div><div class="trend"><h2>今週の人気タグ</h2><p><strong>#東京ランチ</strong>　1,284 posts</p><p><strong>#隠れ家カフェ</strong>　892 posts</p><p><strong>#ひとり飲み</strong>　641 posts</p></div></aside>
+	</div>
+	<nav class="mobile-nav"><button class="active"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V10Z"/></svg></button><button id="mobile-search"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg></button><button id="mobile-add"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 5v14M5 12h14"/></svg></button><button><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c.8-3.3 3.1-5 7-5s6.2 1.7 7 5"/></svg></button></nav>
+	<script>
+		const composer = document.querySelector('#composer');
+		const openComposer = () => { composer.classList.toggle('open'); if (composer.classList.contains('open')) document.querySelector('#post-text').focus(); };
+		document.querySelector('#open-composer').addEventListener('click', openComposer);
+		document.querySelector('#mobile-add').addEventListener('click', openComposer);
+		document.querySelector('#submit-post').addEventListener('click', () => {
+			const text = document.querySelector('#post-text').value.trim();
+			if (!text) return;
+			const card = document.createElement('article');
+			card.className = 'post-card';
+			card.innerHTML = '<div class="post-head"><div class="user"><div class="avatar c">T</div><div><b>toma</b><span>たった今 ・ 東京</span></div></div><button class="dots">•••</button></div><div class="post-image image-one"><div class="place-tag">⌖　おすすめのお店</div></div><div class="post-body"><div class="actions"><button class="action like"><span>♡</span><em>0</em></button><button class="action"><span>◯</span><em>コメント</em></button><button class="action bookmark"><span>♧</span><em>保存</em></button></div><p class="caption"><b>toma</b>' + text.replace(/[<>&]/g, '') + '</p><div class="meta"><span>♧ おすすめ</span><span>今日の投稿</span></div></div>';
+			document.querySelector('main').insertBefore(card, composer.nextSibling);
+			document.querySelector('#post-text').value = ''; composer.classList.remove('open'); bindReactions(card);
+		});
+		const rankingData = {
+			overall: [
+				{ name: 'Bistro Lien', area: '神楽坂', genre: 'フレンチ', score: 4.9, reviews: '1,284件' },
+				{ name: 'PIZZERIA da Luca', area: '中目黒', genre: 'イタリアン', score: 4.8, reviews: '1,126件' },
+				{ name: 'Sora Coffee', area: '代官山', genre: 'カフェ', score: 4.8, reviews: '918件' },
+				{ name: '銀座 すし旬', area: '銀座', genre: '寿司', score: 4.7, reviews: '842件' },
+				{ name: 'Maki Ramen', area: '下北沢', genre: 'ラーメン', score: 4.7, reviews: '785件' }
+			],
+			cafe: [
+				{ name: 'Sora Coffee', area: '代官山', genre: 'カフェ', score: 4.9, reviews: '918件' },
+				{ name: '杏の庭', area: '渋谷', genre: 'カフェ', score: 4.8, reviews: '703件' },
+				{ name: 'Moonlight Table', area: '恵比寿', genre: 'カフェ', score: 4.7, reviews: '602件' },
+				{ name: '白い花', area: '表参道', genre: 'カフェ', score: 4.7, reviews: '541件' },
+				{ name: '木漏れ日珈琲', area: '吉祥寺', genre: 'カフェ', score: 4.6, reviews: '489件' }
+			],
+			lunch: [
+				{ name: 'Bistro Lien', area: '神楽坂', genre: 'ランチ', score: 4.9, reviews: '1,284件' },
+				{ name: '肉と麦', area: '新宿', genre: 'ランチ', score: 4.8, reviews: '873件' },
+				{ name: '菜の香', area: '中野', genre: 'ランチ', score: 4.8, reviews: '741件' },
+				{ name: 'olive lunch', area: '大久保', genre: 'ランチ', score: 4.7, reviews: '630件' },
+				{ name: '麦の穂', area: '池袋', genre: 'ランチ', score: 4.6, reviews: '528件' }
+			],
+			izakaya: [
+				{ name: '夜の台所', area: '六本木', genre: '居酒屋', score: 4.9, reviews: '966件' },
+				{ name: '枝豆屋', area: '新橋', genre: '居酒屋', score: 4.8, reviews: '804件' },
+				{ name: '八丁味噌', area: '上野', genre: '居酒屋', score: 4.8, reviews: '692件' },
+				{ name: '焼き鳥すみれ', area: '渋谷', genre: '居酒屋', score: 4.7, reviews: '606件' },
+				{ name: '深夜の灯', area: '池袋', genre: '居酒屋', score: 4.6, reviews: '541件' }
+			],
+			sweets: [
+				{ name: 'ミルクの雫', area: '原宿', genre: 'スイーツ', score: 4.9, reviews: '882件' },
+				{ name: 'ふわこっ', area: '代官山', genre: 'スイーツ', score: 4.8, reviews: '756件' },
+				{ name: 'チョコノート', area: '秋葉原', genre: 'スイーツ', score: 4.8, reviews: '698件' },
+				{ name: '甘味処 うらら', area: '自由が丘', genre: 'スイーツ', score: 4.7, reviews: '573件' },
+				{ name: 'フルーツらんど', area: '吉祥寺', genre: 'スイーツ', score: 4.6, reviews: '511件' }
+			]
+		};
+
+	<script src="./shop-map.js"></script>
+		function renderRanking(key) {
+			const list = document.querySelector('#ranking-list');
+			const items = rankingData[key] || rankingData.overall;
+			list.innerHTML = items.map((item, index) => `
+				<li class="rank-item">
+					<div class="rank-number">${index + 1}</div>
+					<div class="rank-main">
+						<strong>${item.name}</strong>
+						<div class="rank-meta">
+							<span>${item.genre}</span>
+							<span>・</span>
+							<span>${item.area}</span>
+						</div>
+					</div>
+					<div class="rank-score">
+						<span>★ ${item.score.toFixed(1)}</span>
+						<small>${item.reviews}</small>
+					</div>
+				</li>
+			`).join('');
+		}
+
+		function bindReactions(scope = document) { scope.querySelectorAll('.like').forEach(button => button.onclick = () => { button.classList.toggle('liked'); button.querySelector('span').textContent = button.classList.contains('liked') ? '♥' : '♡'; }); scope.querySelectorAll('.bookmark').forEach(button => button.onclick = () => { button.classList.toggle('saved'); button.querySelector('em').textContent = button.classList.contains('saved') ? '保存済み' : '保存'; }); }
+		bindReactions();
+		renderRanking('overall');
+		document.querySelectorAll('.ranking-tab').forEach(tab => tab.addEventListener('click', () => {
+			document.querySelectorAll('.ranking-tab').forEach(item => {
+				item.classList.toggle('active', item === tab);
+				item.setAttribute('aria-selected', String(item === tab));
+			});
+			renderRanking(tab.dataset.ranking);
+		}));
+		document.querySelectorAll('.topic').forEach(topic => topic.addEventListener('click', () => { document.querySelectorAll('.topic').forEach(item => item.classList.remove('selected')); topic.classList.add('selected'); }));
+		document.querySelector('#search-input').addEventListener('input', event => { const query = event.target.value.toLowerCase(); document.querySelectorAll('.post-card').forEach(card => { card.style.display = !query || card.dataset.keywords?.toLowerCase().includes(query) || card.textContent.toLowerCase().includes(query) ? '' : 'none'; }); });
+		document.querySelectorAll('.menu button').forEach(button => button.addEventListener('click', () => { document.querySelectorAll('.menu button').forEach(item => item.classList.remove('active')); button.classList.add('active'); document.querySelector('#page-title').textContent = button.dataset.view === 'ホーム' ? 'みんなのおすすめ' : button.dataset.view; }));
+	</script>
 </body>
 </html>
+
